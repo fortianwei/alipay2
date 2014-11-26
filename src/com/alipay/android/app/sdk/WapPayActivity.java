@@ -1,10 +1,10 @@
 package com.alipay.android.app.sdk;
 
+import java.lang.reflect.Method;
+
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -18,15 +18,14 @@ import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
-import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+
 import com.alipay.android.app.lib.ResourceMap;
 import com.alipay.android.app.util.LogUtils;
 import com.alipay.android.app.util.Utils;
 import com.alipay.android.app.widget.Loading;
-import java.lang.reflect.Method;
 
 public class WapPayActivity extends Activity
 {
