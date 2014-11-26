@@ -1,40 +1,34 @@
 package com.alipay.android.app.sdk;
 
-import java.lang.reflect.Method;
-
-import me.gall.totalpay.android.UtilLegacy;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewGroup.LayoutParams;
 import android.webkit.JsPromptResult;
 import android.webkit.JsResult;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
+import android.webkit.WebSettings.RenderPriority;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-
 import com.alipay.android.app.lib.ResourceMap;
 import com.alipay.android.app.util.LogUtils;
 import com.alipay.android.app.util.Utils;
 import com.alipay.android.app.widget.Loading;
+import java.lang.reflect.Method;
 
-@SuppressLint("JavascriptInterface")
-public class WapPayActivity /*extends Activity*/
+public class WapPayActivity extends Activity
 {
   private static final String PAY_RESULT_TAG = "sdk_result_code:";
   private WebView mWebView;
@@ -42,11 +36,7 @@ public class WapPayActivity /*extends Activity*/
   private int mTimeout;
   private Loading mLoading;
   private Handler mHandler = new Handler();
-  private Activity mActivity;
-  public WapPayActivity(Activity activity) {
-	  mActivity = activity;
-  }
-  
+
   private Runnable mDelayRunnable = new Runnable()
   {
     public void run()
@@ -58,19 +48,19 @@ public class WapPayActivity /*extends Activity*/
     }
   };
 
-  protected void onCreate(Intent intent)
+  protected void onCreate(Bundle savedInstanceState)
   {
-//    super.onCreate(savedInstanceState);
-//    Intent intent = getIntent();
+    super.onCreate(savedInstanceState);
+    Intent intent = getIntent();
     String url = intent.getExtras().getString("url");
     this.mTimeout = intent.getExtras().getInt("timeout", 15);
 
-    this.mActivity.setContentView(getMainLayout());
+    setContentView(ResourceMap.getLayout_pay_main());
 
-//    this.mWebView = ((WebView)findViewById(ResourceMap.getId_webView()));
+    this.mWebView = ((WebView)findViewById(ResourceMap.getId_webView()));
 
     WebSettings settings = this.mWebView.getSettings();
-    settings.setUserAgentString(Utils.getUserAgent(mActivity));
+    settings.setUserAgentString(Utils.getUserAgent(this));
     settings.setJavaScriptEnabled(true);
     settings.setDomStorageEnabled(true);
     settings.setRenderPriority(WebSettings.RenderPriority.HIGH);
@@ -81,7 +71,7 @@ public class WapPayActivity /*extends Activity*/
     settings.setMinimumFontSize(settings.getMinimumFontSize() + 8);
     this.mWebView.loadUrl(url);
 
-//    this.mRefreshButton = ((Button)findViewById(ResourceMap.getId_btn_refresh()));
+    this.mRefreshButton = ((Button)findViewById(ResourceMap.getId_btn_refresh()));
     this.mRefreshButton.setOnClickListener(new View.OnClickListener()
     {
       public void onClick(View v) {
@@ -117,28 +107,30 @@ public class WapPayActivity /*extends Activity*/
   public void finish()
   {
     notifyCaller();
-//    super.finish();
+    super.finish();
   }
 
   public void notifyCaller() {
-    synchronized (AliPay.sLock) {
+    Object lock = AliPay.sLock;
+
+    synchronized (lock) {
       try {
-    	  AliPay.sLock.notify();
+        lock.notify();
       } catch (Exception e) {
         LogUtils.printExceptionStackTrace(e);
       }
     }
   }
 
- /* public void onConfigurationChanged(Configuration newConfig)
+  public void onConfigurationChanged(Configuration newConfig)
   {
     super.onConfigurationChanged(newConfig);
-  }*/
+  }
 
   private void showLoading()
   {
     if (this.mLoading == null)
-      this.mLoading = new Loading(mActivity);
+      this.mLoading = new Loading(this);
     this.mLoading.show();
   }
 
@@ -173,7 +165,7 @@ public class WapPayActivity /*extends Activity*/
             WapPayActivity.this.finish();
           }
         };
-        mActivity.runOnUiThread(action);
+        WapPayActivity.this.runOnUiThread(action);
       }
     }
   }
@@ -187,7 +179,7 @@ public class WapPayActivity /*extends Activity*/
     public boolean onJsAlert(WebView view, String url, String message, final JsResult result)
     {
       AlertDialog.Builder alert = new AlertDialog.Builder(
-    		  mActivity);
+        WapPayActivity.this);
       alert.setTitle(ResourceMap.getString_confirm_title())
         .setMessage(message)
         .setPositiveButton(ResourceMap.getString_ensure(), 
@@ -212,7 +204,7 @@ public class WapPayActivity /*extends Activity*/
     public boolean onJsConfirm(WebView view, String url, String message, final JsResult result)
     {
       AlertDialog.Builder alert = new AlertDialog.Builder(
-    		  mActivity);
+        WapPayActivity.this);
       alert.setTitle(ResourceMap.getString_confirm_title())
         .setMessage(message)
         .setPositiveButton(ResourceMap.getString_ensure(), 
@@ -223,7 +215,7 @@ public class WapPayActivity /*extends Activity*/
           result.confirm();
         }
       }).setNegativeButton(ResourceMap.getString_cancel(), 
-        new DialogInterface.OnClickListener( )
+        new DialogInterface.OnClickListener()
       {
         public void onClick(DialogInterface dialog, int which)
         {
@@ -233,10 +225,10 @@ public class WapPayActivity /*extends Activity*/
       return true;
     }
 
-    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue,final JsPromptResult result)
+    public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, final JsPromptResult result)
     {
       AlertDialog.Builder alert = new AlertDialog.Builder(
-    		  mActivity);
+        WapPayActivity.this);
       alert.setTitle(ResourceMap.getString_confirm_title())
         .setMessage(message)
         .setPositiveButton(ResourceMap.getString_ensure(), 

@@ -88,10 +88,8 @@ public class AliPay
             extras.putString("url", AliPay.this.mUrl);
             extras.putInt("timeout", AliPay.this.mTimeout);
             intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-            WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-            wapPayActivity.onCreate(intent);
-            //AliPay2.this.mContext.startActivity(intent);
+            
+            mContext.startActivity(intent);
           }
           else {
             AliPay.this.downloadFile();
@@ -301,10 +299,7 @@ public class AliPay
         extras.putString("url", url);
         extras.putInt("timeout", timeout);
         intent.putExtras(extras);
-      //WapPayActivity 不再是一个activity了
-        WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-        wapPayActivity.onCreate(intent);
-//        this.mContext.startActivity(intent);
+        mContext.startActivity(intent);
 
         synchronized (sLock) {
           try {
@@ -461,10 +456,7 @@ public class AliPay
 //              Log.e("twtw", "url:"+AliPay2.this.mUrl);
               extras.putInt("timeout", AliPay.this.mTimeout);
               intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-              WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-              wapPayActivity.onCreate(intent);
-//              AliPay2.this.mContext.startActivity(intent);
+              mContext.startActivity(intent);
               
             }
             else {
@@ -481,60 +473,6 @@ public class AliPay
                 }
               }
             }
-    	  
-         
-        /*AlertDialog.Builder alertDialog = new AlertDialog.Builder(
-          AliPay2.this.mContext);
-        alertDialog.setTitle(ResourceMap.getString_confirm_title());
-        alertDialog.setMessage(downloadMessage);
-
-        alertDialog.setNegativeButton(ResourceMap.getString_cancel(), 
-          new DialogInterface.OnClickListener()
-        {
-          public void onClick(DialogInterface dialog, int which)
-          {
-            if (isWap) {
-              Intent intent = new Intent(AliPay2.this.mContext, 
-                WapPayActivity.class);
-              Bundle extras = new Bundle();
-              extras.putString("url", AliPay2.this.mUrl);
-              extras.putInt("timeout", AliPay2.this.mTimeout);
-              intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-              WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-              wapPayActivity.onCreate(intent);
-//              AliPay2.this.mContext.startActivity(intent);
-            }
-            else {
-              synchronized (AliPay2.sLock) {
-                ResultStatus status = 
-                  ResultStatus.getResultState(6001);
-                Result.setPayResult(Result.parseResult(
-                  status.getStatus(), 
-                  status.getMsg(), ""));
-                try {
-                  AliPay2.sLock.notify();
-                } catch (Exception e) {
-                  LogUtils.printExceptionStackTrace(e);
-                }
-              }
-            }
-          }
-        });
-        alertDialog.setPositiveButton(ResourceMap.getString_ensure(), 
-          new DialogInterface.OnClickListener()
-        {
-          public void onClick(DialogInterface dialog, int which)
-          {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction("android.intent.action.PACKAGE_ADDED");
-            filter.addDataScheme("package");
-            AliPay2.this.mContext.registerReceiver(AliPay2.this.mReceiver, filter);
-
-            AliPay2.this.showInstallMessage();
-          }
-        });
-        alertDialog.show();*/
       }
     };
     this.mHandler.post(runnable);
@@ -553,10 +491,7 @@ public class AliPay
               extras.putString("url", AliPay.this.mUrl);
               extras.putInt("timeout", AliPay.this.mTimeout);
               intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-              WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-              wapPayActivity.onCreate(intent);
-//              AliPay2.this.mContext.startActivity(intent);
+              mContext.startActivity(intent);
             } else {
               synchronized (AliPay.sLock) {
                 ResultStatus status = 
@@ -571,67 +506,6 @@ public class AliPay
                 }
               }
             }
-    	  
-        /*AlertDialog.Builder alertDialog = new AlertDialog.Builder(
-          AliPay2.this.mContext);
-        alertDialog.setTitle(ResourceMap.getString_confirm_title());
-        alertDialog.setMessage(downloadMessage);
-
-        alertDialog.setNegativeButton(ResourceMap.getString_cancel(), 
-          new DialogInterface.OnClickListener()
-        {
-          public void onClick(DialogInterface dialog, int which)
-          {
-            if (isWap) {
-              Intent intent = new Intent(AliPay2.this.mContext, 
-                WapPayActivity.class);
-              Bundle extras = new Bundle();
-              extras.putString("url", AliPay2.this.mUrl);
-              extras.putInt("timeout", AliPay2.this.mTimeout);
-              intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-              WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-              wapPayActivity.onCreate(intent);
-//              AliPay2.this.mContext.startActivity(intent);
-            } else {
-              synchronized (AliPay2.sLock) {
-                ResultStatus status = 
-                  ResultStatus.getResultState(6001);
-                Result.setPayResult(Result.parseResult(
-                  status.getStatus(), 
-                  status.getMsg(), ""));
-                try {
-                  AliPay2.sLock.notify();
-                } catch (Exception e) {
-                  LogUtils.printExceptionStackTrace(e);
-                }
-              }
-            }
-          }
-        });
-        alertDialog.setPositiveButton(ResourceMap.getString_ensure(), 
-          new DialogInterface.OnClickListener()
-        {
-          public void onClick(DialogInterface dialog, int which)
-          {
-            if (!Utils.isVerifyURL(AliPay2.this.mDownloadUrl)) {
-              Intent intent = new Intent(AliPay2.this.mContext, 
-                WapPayActivity.class);
-              Bundle extras = new Bundle();
-              extras.putString("url", AliPay2.this.mUrl);
-              extras.putInt("timeout", AliPay2.this.mTimeout);
-              intent.putExtras(extras);
-            //WapPayActivity 不再是一个activity了
-              WapPayActivity wapPayActivity = new WapPayActivity(mContext);
-              wapPayActivity.onCreate(intent);
-//              AliPay2.this.mContext.startActivity(intent);
-            }
-            else {
-              AliPay2.this.downloadFile();
-            }
-          }
-        });
-        alertDialog.show();*/
       }
     };
     this.mHandler.post(runnable);
