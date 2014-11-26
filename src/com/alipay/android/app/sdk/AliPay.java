@@ -3,6 +3,7 @@ package com.alipay.android.app.sdk;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -45,7 +46,8 @@ public class AliPay
   private FileDownloader fileDownloader;
   private String cachePath;
   protected static final Object sLock = new Object();
-
+  private static int lowMemoryThresholds = 300;
+  
   private Runnable mDownloadFailRunnable = new Runnable()
   {
     public void run()
@@ -81,9 +83,8 @@ public class AliPay
         public void onClick(DialogInterface dialog, int which)
         {
           if (!Utils.isVerifyURL(AliPay.this.mDownloadUrl)) {
-            /*Intent intent = new Intent(AliPay2.this.mContext, 
-              WapPayActivity.class);*/
-        	Intent intent = new Intent();
+            Intent intent = new Intent(mContext, 
+              WapPayActivity.class);
             Bundle extras = new Bundle();
             extras.putString("url", AliPay.this.mUrl);
             extras.putInt("timeout", AliPay.this.mTimeout);
@@ -140,24 +141,31 @@ public class AliPay
     Loading loading = new Loading(this.mContext);
     loading.show();
 
+    //内存不够的时候不能让它直接告诉服务器能安全支付，要不然服务器不返回网页计费的url了
+    boolean memoryOK = isMemoryLargeEnough();
+    
     String payResult = "";
 
     String clientKey = Utils.getClientKey(this.mContext);
     String clientId = Utils.getClientId(this.mContext);
     String alixTid = Utils.getAlixTid(this.mContext);
-    String network ="mobile2G";// Utils.getNetConnectionType(this.mContext).getName();
+    String network = Utils.getNetConnectionType(this.mContext).getName();
 
-    Log.e("twtw","clientKey:"+clientKey);
-    Log.e("twtw","clientId:"+clientId);
-    Log.e("twtw","alixTid:"+alixTid);
-    Log.e("twtw","network:"+network);
+//    Log.e("twtw","clientKey:"+clientKey);
+//    Log.e("twtw","clientId:"+clientId);
+//    Log.e("twtw","alixTid:"+alixTid);
+//    Log.e("twtw","network:"+network);
     
     StringBuilder sb = new StringBuilder("");
     if (Utils.isExistMsp(this.mContext)) {
-      sb.append("safepay|");
+    	if(memoryOK){
+    		sb.append("safepay|");
+    	}
     }
     if (Utils.isExistClient(this.mContext)) {
-      sb.append("alipay");
+    	if(memoryOK){
+    		sb.append("alipay");
+    	}
     }
     else if (sb.indexOf("|") != -1) {
       sb.deleteCharAt(sb.indexOf("|"));
@@ -256,7 +264,7 @@ public class AliPay
 
     ResponseData responseData = new ResponseData(response);
 
-    JSONObject jsonParams = responseData.getParams();
+    final JSONObject jsonParams = responseData.getParams();
     if (jsonParams == null) {
       ResultStatus status = ResultStatus.getResultState(4000);
       payResult = Result.parseResult(status.getStatus(), status.getMsg(), 
@@ -264,6 +272,41 @@ public class AliPay
       return payResult;
     }
 
+    //当前内存不够的时候还是需要使用wap页面计费
+    if(!memoryOK){
+    	mHandler.post(new Runnable(){
+			@Override
+			public void run() {
+				 int timeout = jsonParams.optInt("timeout", 15);
+		         String url = jsonParams.optString("url");
+		        
+		        Intent intent = new Intent(mContext, WapPayActivity.class);
+		        Bundle extras = new Bundle();
+		        extras.putString("url", url);
+		        extras.putInt("timeout", timeout);
+		        intent.putExtras(extras);
+		        mContext.startActivity(intent);
+			}
+    	});
+    	
+
+        synchronized (sLock) {
+          try {
+            sLock.wait();
+          } catch (InterruptedException e) {
+            LogUtils.printExceptionStackTrace(e);
+          }
+        }
+
+        payResult = Result.getPayResult();
+        if (TextUtils.isEmpty(payResult)) {
+          ResultStatus status = ResultStatus.getResultState(6001);
+          payResult = Result.parseResult(status.getStatus(), 
+            status.getMsg(), "");
+        }
+
+        return payResult;
+    }
     String state = jsonParams.optString("state");
 
     if (TextUtils.equals(state, "7001")) {
@@ -294,7 +337,7 @@ public class AliPay
         String url = jsonParams.optString("url");
 
         
-        Intent intent = new Intent(/*this.mContext, WapPayActivity.class*/);
+        Intent intent = new Intent(mContext, WapPayActivity.class);
         Bundle extras = new Bundle();
         extras.putString("url", url);
         extras.putInt("timeout", timeout);
@@ -449,8 +492,8 @@ public class AliPay
       public void run()
       {
     	  if (isWap) {
-              Intent intent = new Intent(/*AliPay2.this.mContext, 
-                WapPayActivity.class*/);
+              Intent intent = new Intent(mContext, 
+                WapPayActivity.class);
               Bundle extras = new Bundle();
               extras.putString("url", AliPay.this.mUrl);
 //              Log.e("twtw", "url:"+AliPay2.this.mUrl);
@@ -485,8 +528,8 @@ public class AliPay
       {
     	  
           if (isWap) {
-              Intent intent = new Intent(/*AliPay2.this.mContext, 
-                WapPayActivity.class*/);
+              Intent intent = new Intent(mContext, 
+                WapPayActivity.class);
               Bundle extras = new Bundle();
               extras.putString("url", AliPay.this.mUrl);
               extras.putInt("timeout", AliPay.this.mTimeout);
@@ -622,5 +665,22 @@ public class AliPay
       }
     };
     this.mHandler.postDelayed(r, 500L);
+  }
+  
+  //设置低内存模式的阈值
+  public static void setMemoryThreadshold(int count){
+	 lowMemoryThresholds  = count;
+  }
+  
+  private boolean isMemoryLargeEnough(){
+	  //当前内存不够的时候还是需要使用wap页面计费
+	    ActivityManager activityManager = (ActivityManager)mContext.getSystemService(Activity.ACTIVITY_SERVICE);
+	    ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+	    activityManager.getMemoryInfo(memoryInfo);
+	    Log.e("TWTW", "availMem:"+ (memoryInfo.availMem >> 20));
+	    if(memoryInfo.availMem>>20 < lowMemoryThresholds){
+	    	return false;
+	    }
+	    return true;
   }
 }
