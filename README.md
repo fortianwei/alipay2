@@ -38,3 +38,12 @@ alipay2
 					AliPay.setMemoryThreadshold(200);//添加这句话，不添加默认设定为300M是低内存状态
 					String result = alipay.pay(orderInfo);
 </pre>
+
+##接下去打算做
+
+WapPayActivity动态加载，脱离activity范畴
+
+
+##发现问题/有其他建议？
+
+可以fork && pull request，或者加我qq 524838881，alipay计费一直有很多朋友不明确，我也希望做好点以后方便大家新手朋友们使用。
