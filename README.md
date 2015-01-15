@@ -24,7 +24,8 @@ alipay2
 
 ##如何使用？
 
-拷贝dist下面的alipay.jar替换掉你原来使用的那个alipay.jar即可。
+拷贝`dist`下面的alipay.jar替换掉你原来使用的那个alipay.jar即可。
+
 在调用的时候加上你自己设定的内存滴的阈值，默认是300，意思是低于300M的话就算是低内存状态，这个时候就会自动优先使用网页计费而不是msp或者client计费。
 
 例如：AliPay.setMemoryThreadshold(200); 就是设定低于200M的时候算是低内存状态。
@@ -47,3 +48,6 @@ WapPayActivity动态加载，脱离activity范畴
 ##发现问题/有其他建议？
 
 可以fork && pull request，或者加我qq 524838881，alipay计费一直有很多朋友不明确，我也希望做好点以后方便大家新手朋友们使用。
+
+##新增alipay_lib
+如果down下alipay2工程，会依赖这个工程。这个原本是官方sdk中带着的，为了方便使用，也把它放进去。需要把它单独提取出来作为android library 供alipay2使用。
