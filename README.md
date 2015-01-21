@@ -40,6 +40,10 @@ alipay2
 					String result = alipay.pay(orderInfo);
 </pre>
 
+##新增alipay_lib
+
+如果down下alipay2工程，会依赖这个工程。这个原本是官方sdk中带着的，为了方便使用，也把它放进去。需要把它单独提取出来作为android library 供alipay2使用。
+
 ##如何修改代码生成自己的alipay.jar？
 
 可以拷贝本项目 git clone https://github.com/fortianwei/alipay2   到本地，将里面的alipay_lib单独拿出来作为一个lib工程，然后就可以修改里面的代码了。
@@ -53,5 +57,3 @@ alipay2
 
 可以fork && pull request，或者加我qq 524838881，alipay计费一直有很多朋友不明确，我也希望做好点以后方便大家新手朋友们使用。
 
-##新增alipay_lib
-如果down下alipay2工程，会依赖这个工程。这个原本是官方sdk中带着的，为了方便使用，也把它放进去。需要把它单独提取出来作为android library 供alipay2使用。
