@@ -40,9 +40,13 @@ alipay2
 					String result = alipay.pay(orderInfo);
 </pre>
 
-##接下去打算做
+##如何修改代码生成自己的alipay.jar？
 
-WapPayActivity动态加载，脱离activity范畴
+可以拷贝本项目 git clone https://github.com/fortianwei/alipay2   到本地，将里面的alipay_lib单独拿出来作为一个lib工程，然后就可以修改里面的代码了。
+
+将alipay2/lib/下的alipay.jar(这个是官方原版的）解压到目录alipay，然后用我们自己编译好的class文件(eclipse的话一般在bin/目录下)替换掉原有的class文件。
+
+执行命令 jar cvf alipay.jar  alipay   就生成自己版本的jar包了，直接替换原有工程里面的jar包即可。
 
 
 ##发现问题/有其他建议？
