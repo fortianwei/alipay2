@@ -40,6 +40,8 @@ alipay2
 					String result = alipay.pay(orderInfo);
 </pre>
 
+【注意】：使用该jar包的时候，不要将你的工程设置targetSdkVersion >= 17。 因为支付宝网页支付，需要用到java 和 javascript通信，但是默认是低于api 17的，因为高于api17的话，需要将所有javascript需要的java接口添加注解@JavascriptInterface，为了兼容低版本，没有添加这个，所以切记不要设置targetSdkVersion大于等于17了（事实上，为了保持各种版本兼容，日常的项目中，这个targetSdkVersion还是10左右好点）。
+
 ##新增alipay_lib
 
 如果down下alipay2工程，会依赖这个工程。这个原本是官方sdk中带着的，为了方便使用，也把它放进去。需要把它单独提取出来作为android library 供alipay2使用。
