@@ -40,7 +40,14 @@ alipay2
 					String result = alipay.pay(orderInfo);
 </pre>
 
-【注意】：使用该jar包的时候，不要将你的工程设置targetSdkVersion >= 17。 因为支付宝网页支付，需要用到java 和 javascript通信，但是默认是低于api 17的，因为高于api17的话，需要将所有javascript需要的java接口添加注解@JavascriptInterface，为了兼容低版本，没有添加这个，所以切记不要设置targetSdkVersion大于等于17了（事实上，为了保持各种版本兼容，日常的项目中，这个targetSdkVersion还是10左右好点）。
+【注意】：使用该jar包的时候，不要将你的工程设置targetSdkVersion >= 17。
+否则的话，在4.2系统以上的手机上会出现（如果跳转到网页支付宝支付页面）计费成功后，无法正常返回界面，按返回键回去的话直接是用户取消计费（此次计费会出问题）。
+
+原因：支付成功后，javascript会调用java接口showSource。如果targetSdkVersion >= 17，并且使用的手机系统为4.2及以上，那么就会严格按照api17的规则走，在api17里面，需要注册的javascript interface都添加注解@JavascriptInterface才能使用。
+
+为了兼容低版本，代码中没有添加这个，所以切记不要设置targetSdkVersion大于等于17了（事实上，为了保持各种版本兼容，日常的项目中，这个targetSdkVersion还是10左右好点）。
+
+当然了，如果你能保证你的手机就在4.2的系统上跑，那就可以设置targetSdkVersion >= 17。不过修改里面的WapPayActivity.java，将对应的注解加上，然后按照下面【如何修改代码生成自己的alipay.jar】 这一步，来生成自己的jar包并使用。
 
 ##新增alipay_lib
 
